@@ -107,7 +107,14 @@ public class ArbolesBinarios {
                     break;
                 case 9:
                     //Mostrar árbol
-
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            JFrame frame = new ArbolBinarioGrafico(arbol);
+                            frame.setSize(800, 600);
+                            frame.setVisible(true);
+                        }
+                    });
                     break;
                 case 10:
                     //Mostrar Hermanos
@@ -157,4 +164,3 @@ public class ArbolesBinarios {
     }
 
 }
-

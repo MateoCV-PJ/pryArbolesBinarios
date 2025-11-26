@@ -18,11 +18,42 @@ public class Arbol {
     }
 
     public void Construir(String cad) {
-        String cadena = cad.toUpperCase();
+        // Asumimos que 'cad' siempre es una cadena válida (no null).
+        String cadena = cad.toUpperCase().trim();
 
-        for (char ch : cadena.toCharArray()) {
-            insertarDato(String.valueOf(ch));
+        java.util.List<Character> elementos = new java.util.ArrayList<>();
+        if (cadena.contains(",")) {
+            for (String token : cadena.split(",")) {
+                token = token.trim();
+                if (!token.isEmpty()) {
+                    elementos.add(Character.toUpperCase(token.charAt(0)));
+                }
+            }
+        } else {
+            for (char ch : cadena.toCharArray()) {
+                if (!Character.isWhitespace(ch)) {
+                    elementos.add(Character.toUpperCase(ch));
+                }
+            }
         }
+
+        // Eliminar duplicados y ordenar
+        java.util.Set<Character> ordenadoUnico = new java.util.TreeSet<>(elementos);
+        java.util.List<Character> lista = new java.util.ArrayList<>(ordenadoUnico);
+
+        // Construir el árbol balanceado a partir de la lista ordenada (o dejarlo nulo si no hay elementos)
+        this.Raiz = lista.isEmpty() ? null : construirBalanceado(lista, 0, lista.size() - 1);
+    }
+
+    private Nodo construirBalanceado(java.util.List<Character> lista, int inicio, int fin) {
+        if (fin < inicio) {
+            return null;
+        }
+        int medio = (inicio + fin) / 2;
+        Nodo nodo = new Nodo(lista.get(medio));
+        nodo.setLi(construirBalanceado(lista, inicio, medio - 1));
+        nodo.setLd(construirBalanceado(lista, medio + 1, fin));
+        return nodo;
     }
 
     // Posorden: Izquierdo, derecho, Raiz
@@ -239,7 +270,9 @@ public class Arbol {
     }
 
     //Mostrar arbol
-    //Creando implimentacion grafica por swing o javaFX
+    //https://www.youtube.com/watch?v=ind_O7bO5O8
+    //https://github.com/Nanotech2022/arboles-binarios
+
 
     //Mostrar Hermanos de un dato ingresado
     public String hermanos(String s) {
