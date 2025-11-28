@@ -17,42 +17,113 @@ public class Arbol {
         this.Raiz = Raiz;
     }
 
+    // Construir el árbol AVL
     public void Construir(String cad) {
-        // Asumimos que 'cad' siempre es una cadena válida (no null).
-        String cadena = cad.toUpperCase().trim();
-
-        java.util.List<Character> elementos = new java.util.ArrayList<>();
-        if (cadena.contains(",")) {
-            for (String token : cadena.split(",")) {
-                token = token.trim();
-                if (!token.isEmpty()) {
-                    elementos.add(Character.toUpperCase(token.charAt(0)));
-                }
-            }
-        } else {
-            for (char ch : cadena.toCharArray()) {
-                if (!Character.isWhitespace(ch)) {
-                    elementos.add(Character.toUpperCase(ch));
+        if (cad == null) {
+            this.Raiz = null;
+            return;
+        }
+        String cadena = cad.toUpperCase();
+        boolean[] presencia = new boolean[26]; // evita duplicados
+        for (int i = 0; i < cadena.length(); i++) {
+            char ch = cadena.charAt(i);
+            if (ch >= 'A' && ch <= 'Z') {
+                int idx = ch - 'A';
+                if (!presencia[idx]) {
+                    presencia[idx] = true;
+                    this.Raiz = insertarAVL(this.Raiz, ch);
                 }
             }
         }
-
-        // Eliminar duplicados y ordenar
-        java.util.Set<Character> ordenadoUnico = new java.util.TreeSet<>(elementos);
-        java.util.List<Character> lista = new java.util.ArrayList<>(ordenadoUnico);
-
-        // Construir el árbol balanceado a partir de la lista ordenada (o dejarlo nulo si no hay elementos)
-        this.Raiz = lista.isEmpty() ? null : construirBalanceado(lista, 0, lista.size() - 1);
     }
 
-    private Nodo construirBalanceado(java.util.List<Character> lista, int inicio, int fin) {
-        if (fin < inicio) {
-            return null;
+    // obtener altura segura de un nodo
+    private int alturaNodo(Nodo n) {
+        return (n == null) ? 0 : n.getAltura();
+    }
+
+    // actualizar altura de nodo = 1 + max(alturaIzq, alturaDer)
+    private void actualizarAltura(Nodo n) {
+        if (n != null) {
+            int hi = alturaNodo(n.getLi());
+            int hd = alturaNodo(n.getLd());
+            n.setAltura(Math.max(hi, hd) + 1);
         }
-        int medio = (inicio + fin) / 2;
-        Nodo nodo = new Nodo(lista.get(medio));
-        nodo.setLi(construirBalanceado(lista, inicio, medio - 1));
-        nodo.setLd(construirBalanceado(lista, medio + 1, fin));
+    }
+
+    // factor de balance = alturaIzq - alturaDer
+    private int factorBalance(Nodo n) {
+        if (n == null) return 0;
+        return alturaNodo(n.getLi()) - alturaNodo(n.getLd());
+    }
+
+    // rotación derecha
+    private Nodo rotacionDerecha(Nodo y) {
+        Nodo x = y.getLi();
+        Nodo T2 = x.getLd();
+
+        // rotación
+        x.setLd(y);
+        y.setLi(T2);
+
+        // actualizar alturas
+        actualizarAltura(y);
+        actualizarAltura(x);
+
+        return x; // nueva raíz
+    }
+
+    // rotación izquierda
+    private Nodo rotacionIzquierda(Nodo x) {
+        Nodo y = x.getLd();
+        Nodo T2 = y.getLi();
+
+        y.setLi(x);
+        x.setLd(T2);
+
+        actualizarAltura(x);
+        actualizarAltura(y);
+
+        return y;
+    }
+
+    // insertar como AVL recursivo
+    private Nodo insertarAVL(Nodo nodo, char dato) {
+        if (nodo == null) return new Nodo(dato);
+        if (dato < nodo.getDato()) {
+            nodo.setLi(insertarAVL(nodo.getLi(), dato));
+        } else if (dato > nodo.getDato()) {
+            nodo.setLd(insertarAVL(nodo.getLd(), dato));
+        } else {
+            // duplicado -> no insertar
+            return nodo;
+        }
+
+        // actualizar altura
+        actualizarAltura(nodo);
+
+        int fb = factorBalance(nodo);
+
+        // casos de rotación
+        // Left Left
+        if (fb > 1 && dato < nodo.getLi().getDato()) {
+            return rotacionDerecha(nodo);
+        }
+        // Right Right
+        if (fb < -1 && dato > nodo.getLd().getDato()) {
+            return rotacionIzquierda(nodo);
+        }
+        // Left Right
+        if (fb > 1 && dato > nodo.getLi().getDato()) {
+            nodo.setLi(rotacionIzquierda(nodo.getLi()));
+            return rotacionDerecha(nodo);
+        }
+        // Right Left
+        if (fb < -1 && dato < nodo.getLd().getDato()) {
+            nodo.setLd(rotacionDerecha(nodo.getLd()));
+            return rotacionIzquierda(nodo);
+        }
+
         return nodo;
     }
 
@@ -165,13 +236,6 @@ public class Arbol {
         if (p == null) return -1; // no encontrado
         return alturaNodo(p);
     }
-    // altura de un nodo: altura de subárbol en número de aristas
-    private int alturaNodo(Nodo r) {
-        if (r == null) return -1;
-        int hi = alturaNodo(r.getLi());
-        int hd = alturaNodo(r.getLd());
-        return Math.max(hi, hd) + 1;
-    }
 
     //Mostrar Ancestros de un dato ingresado
     public String ancestros(String s) {
@@ -226,47 +290,75 @@ public class Arbol {
         }
     }
 
-    //Eliminar un dato en el arbol --------------- REVISAR
+    //Eliminar un dato en el arbol
     public boolean eliminarDato(String s) {
-        if (Raiz == null) return false;
+        if (Raiz == null || s == null || s.isEmpty()) return false;
         char d = Character.toUpperCase(s.charAt(0));
         boolean[] eliminado = new boolean[1];
-        Raiz = eliminarRec(Raiz, d, eliminado);
+        this.Raiz = eliminarAVL(this.Raiz, d, eliminado);
         return eliminado[0];
     }
-    private Nodo eliminarRec(Nodo r, char d, boolean[] eliminado) {
-        if (r == null) return null;
-        if (d < r.getDato()) {
-            r.setLi(eliminarRec(r.getLi(), d, eliminado));
-        } else if (d > r.getDato()) {
-            r.setLd(eliminarRec(r.getLd(), d, eliminado));
+    private Nodo eliminarAVL(Nodo nodo, char dato, boolean[] eliminado) {
+        if (nodo == null) return null;
+
+        if (dato < nodo.getDato()) {
+            nodo.setLi(eliminarAVL(nodo.getLi(), dato, eliminado));
+        } else if (dato > nodo.getDato()) {
+            nodo.setLd(eliminarAVL(nodo.getLd(), dato, eliminado));
         } else {
             // encontrado
             eliminado[0] = true;
-            // caso 1: hoja
-            if (r.getLi() == null && r.getLd() == null) {
-                return null;
+            // casos con 0 o 1 hijo
+            if (nodo.getLi() == null || nodo.getLd() == null) {
+                Nodo temp = (nodo.getLi() != null) ? nodo.getLi() : nodo.getLd();
+                // sin hijos
+                if (temp == null) {
+                    nodo = null;
+                    return null;
+                } else {
+                    // un hijo
+                    nodo = temp;
+                }
+            } else {
+                // dos hijos: obtener sucesor (mínimo del subárbol derecho)
+                Nodo sucesor = nodo.getLd();
+                while (sucesor.getLi() != null) sucesor = sucesor.getLi();
+                // copiar dato y eliminar sucesor
+                nodo.setDato(sucesor.getDato());
+                nodo.setLd(eliminarAVL(nodo.getLd(), sucesor.getDato(), eliminado));
+                // Note: eliminado[0] permanece true
             }
-            // caso 2: un solo hijo
-            if (r.getLi() == null) {
-                return r.getLd();
-            } else if (r.getLd() == null) {
-                return r.getLi();
-            }
-            // caso 3: dos hijos -> reemplazar por sucesor (mínimo del subárbol derecho)
-            Nodo sucesor = minNodo(r.getLd());
-            r.setDato(sucesor.getDato());
-            // eliminar el sucesor en el subárbol derecho
-            r.setLd(eliminarRec(r.getLd(), sucesor.getDato(), eliminado));
         }
-        return r;
-    }
-    private Nodo minNodo(Nodo r) {
-        Nodo p = r;
-        while (p != null && p.getLi() != null) {
-            p = p.getLi();
+
+        // si el nodo pasó a null tras la eliminación
+        if (nodo == null) return null;
+
+        // actualizar altura
+        actualizarAltura(nodo);
+
+        int fb = factorBalance(nodo);
+
+        // Rebalancear si es necesario
+        // izq izq
+        if (fb > 1 && factorBalance(nodo.getLi()) >= 0) {
+            return rotacionDerecha(nodo);
         }
-        return p;
+        // izq der
+        if (fb > 1 && factorBalance(nodo.getLi()) < 0) {
+            nodo.setLi(rotacionIzquierda(nodo.getLi()));
+            return rotacionDerecha(nodo);
+        }
+        // der der
+        if (fb < -1 && factorBalance(nodo.getLd()) <= 0) {
+            return rotacionIzquierda(nodo);
+        }
+        // der izq
+        if (fb < -1 && factorBalance(nodo.getLd()) > 0) {
+            nodo.setLd(rotacionDerecha(nodo.getLd()));
+            return rotacionIzquierda(nodo);
+        }
+
+        return nodo;
     }
 
     //Mostrar arbol
@@ -300,6 +392,50 @@ public class Arbol {
             }
         }
         return "";
+    }
+
+    //Mostrar Primos Hermanos de un dato ingresado
+    public String primos(String s) {
+        if (Raiz == null || s == null) return "";
+        char dato = Character.toUpperCase(s.charAt(0));
+        // Buscar el nodo y su padre
+        Nodo padre = null;
+        Nodo p = Raiz;
+        while (p != null && p.getDato() != dato) {
+            padre = p;
+            if (dato > p.getDato()) p = p.getLd(); else p = p.getLi();
+        }
+        if (p == null) {
+            return "";       // dato no encontrado
+        }
+        if (padre == null) {
+            return "";  // la raíz no tiene primos
+        }
+
+        // Buscar abuelo (padre del 'padre') desde la raíz, guardando la referencia antes de avanzar
+        Nodo abuelo = null;
+        Nodo aux = Raiz;
+        while (aux != null && aux.getDato() != padre.getDato()) {
+            abuelo = aux;
+            if (padre.getDato() > aux.getDato()) aux = aux.getLd(); else aux = aux.getLi();
+        }
+        if (aux == null) return ""; // no se encontró el padre (no debería ocurrir)
+        if (abuelo == null) return ""; // el padre es la raíz, por tanto no hay abuelo ni primos
+
+        // Determinar el tío
+        Nodo tio = null;
+        if (abuelo.getLi() != null && abuelo.getLi().getDato() == padre.getDato()) {
+            tio = abuelo.getLd();
+        } else if (abuelo.getLd() != null && abuelo.getLd().getDato() == padre.getDato()) {
+            tio = abuelo.getLi();
+        }
+        if (tio == null) return ""; // no hay tío/a, por tanto no hay primos
+
+        // hijos del tío (primos)
+        StringBuilder primos = new StringBuilder();
+        if (tio.getLi() != null) primos.append(tio.getLi().getDato()).append(' ');
+        if (tio.getLd() != null) primos.append(tio.getLd().getDato()).append(' ');
+        return primos.toString().trim();
     }
 
 }

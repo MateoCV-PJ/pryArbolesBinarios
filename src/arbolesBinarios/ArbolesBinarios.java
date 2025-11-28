@@ -126,6 +126,16 @@ public class ArbolesBinarios {
                         JOptionPane.showMessageDialog(null, "Hermanos del dato '" + datoH + "':\n" + hermanos, "Hermanos", JOptionPane.INFORMATION_MESSAGE);
                     }
                     break;
+                case 11:
+                    //Mostrar Primos Hermanos
+                    String datoPrimos = JOptionPane.showInputDialog(null, "Ingrese el dato para mostrar sus primos hermanos (un caracter):", "Primos Hermanos", JOptionPane.QUESTION_MESSAGE);
+                    String primos = arbol.primos(datoPrimos);
+                    if (primos.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "No se encontraron primos hermanos para el dato '" + datoPrimos + "'.", "Primos Hermanos", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Primos Hermanos del dato '" + datoPrimos + "':\n" + primos, "Primos Hermanos", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                    break;
                 case 0:
                     JOptionPane.showMessageDialog(null, "Hasta pronto, :)");
                     break;
@@ -150,6 +160,7 @@ public class ArbolesBinarios {
                 + "8. Eliminar un dato \n"
                 + "9. Mostrar Árbol \n"
                 + "10. Mostrar Hermanos \n"
+                + "11. Mostrar Primos Hermanos\n"
                 + "0. Salir \n"));
         return opcionPr;
     }

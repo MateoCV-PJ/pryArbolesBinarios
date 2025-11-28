@@ -18,7 +18,7 @@ public class ArbolBinarioGrafico extends JFrame {
     }
 
     // Dibuja el árbol usando el Nodo del proyecto
-    public int drawTree(Graphics g, Nodo x, int x0, int x1, int y){
+    public int dibujarArbol(Graphics g, Nodo x, int x0, int x1, int y){
         if (x == null) return (x0 + x1) / 2;
 
         int m = (x0 + x1) / 2;
@@ -30,12 +30,12 @@ public class ArbolBinarioGrafico extends JFrame {
         g.drawString(t, m+18, y+27);
 
         if (x.getLi() != null) {
-            int x2 = drawTree(g, x.getLi(), x0, m, y+80);
+            int x2 = dibujarArbol(g, x.getLi(), x0, m, y+80);
             g.setColor(Color.BLACK);
             g.drawLine(m+25, y+40, x2+25, y+80);
         }
         if (x.getLd() != null) {
-            int x2 = drawTree(g, x.getLd(), m, x1, y+80);
+            int x2 = dibujarArbol(g, x.getLd(), m, x1, y+80);
             g.setColor(Color.BLACK);
             g.drawLine(m+25, y+40, x2+25, y+80);
         }
@@ -50,6 +50,6 @@ public class ArbolBinarioGrafico extends JFrame {
             g.drawString("(árbol vacío)", 20, 100);
             return;
         }
-        drawTree(g, arbol.getRaiz(), 20, this.getWidth()-45, 100);
+        dibujarArbol(g, arbol.getRaiz(), 20, this.getWidth()-45, 100);
     }
 }
