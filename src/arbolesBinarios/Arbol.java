@@ -37,7 +37,7 @@ public class Arbol {
         }
     }
 
-    // obtener altura segura de un nodo
+    // obtener altura de un nodo
     private int alturaNodo(Nodo n) {
         return (n == null) ? 0 : n.getAltura();
     }
@@ -396,46 +396,64 @@ public class Arbol {
 
     //Mostrar Primos Hermanos de un dato ingresado
     public String primos(String s) {
-        if (Raiz == null || s == null) return "";
+        if (Raiz == null) return "El árbol está vacío.";
+        if (s == null || s.length() == 0) return "Dato inválido.";
         char dato = Character.toUpperCase(s.charAt(0));
+
         // Buscar el nodo y su padre
         Nodo padre = null;
         Nodo p = Raiz;
         while (p != null && p.getDato() != dato) {
             padre = p;
-            if (dato > p.getDato()) p = p.getLd(); else p = p.getLi();
-        }
-        if (p == null) {
-            return "";       // dato no encontrado
-        }
-        if (padre == null) {
-            return "";  // la raíz no tiene primos
+            if (dato > p.getDato()) {
+                p = p.getLd();
+            } else {
+                p = p.getLi();
+            }
         }
 
-        // Buscar abuelo (padre del 'padre') desde la raíz, guardando la referencia antes de avanzar
+        if (p == null) {
+            return "El dato '" + dato + "' no existe en el árbol.";
+        }
+        if (padre == null) {
+            return "El dato '" + dato + "' es la raíz y no tiene primos hermanos.";
+        }
+
+        // Buscar abuelo desde la raíz
         Nodo abuelo = null;
         Nodo aux = Raiz;
         while (aux != null && aux.getDato() != padre.getDato()) {
             abuelo = aux;
             if (padre.getDato() > aux.getDato()) aux = aux.getLd(); else aux = aux.getLi();
         }
-        if (aux == null) return ""; // no se encontró el padre (no debería ocurrir)
-        if (abuelo == null) return ""; // el padre es la raíz, por tanto no hay abuelo ni primos
+        if (aux == null) {
+            return "No se encontró el padre en el árbol.";
+        }
+        if (abuelo == null) {
+            // El padre es la raíz
+            return "El dato '" + dato + "' no tiene primos hermanos porque su padre es la raíz (no tiene hermanos).";
+        }
 
-        // Determinar el tío
+        // Determinar el tío/a (hermano del padre)
         Nodo tio = null;
         if (abuelo.getLi() != null && abuelo.getLi().getDato() == padre.getDato()) {
             tio = abuelo.getLd();
         } else if (abuelo.getLd() != null && abuelo.getLd().getDato() == padre.getDato()) {
             tio = abuelo.getLi();
         }
-        if (tio == null) return ""; // no hay tío/a, por tanto no hay primos
+        if (tio == null) {
+            return "El dato '" + dato + "' no tiene primos hermanos porque su padre no tiene hermanos.";
+        }
 
-        // hijos del tío (primos)
+        // Recopilar hijos del tío (primos)
         StringBuilder primos = new StringBuilder();
+        if (tio.getLi() == null && tio.getLd() == null) {
+            return "El dato '" + dato + "' no tiene primos hermanos porque el tío/a no tiene hijos.";
+        }
         if (tio.getLi() != null) primos.append(tio.getLi().getDato()).append(' ');
         if (tio.getLd() != null) primos.append(tio.getLd().getDato()).append(' ');
-        return primos.toString().trim();
+
+        return "Primos hermanos de '" + dato + "': " + primos.toString().trim();
     }
 
 }

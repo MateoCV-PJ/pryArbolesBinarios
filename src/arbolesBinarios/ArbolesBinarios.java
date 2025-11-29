@@ -130,9 +130,15 @@ public class ArbolesBinarios {
                     //Mostrar Primos Hermanos
                     String datoPrimos = JOptionPane.showInputDialog(null, "Ingrese el dato para mostrar sus primos hermanos (un caracter):", "Primos Hermanos", JOptionPane.QUESTION_MESSAGE);
                     String primos = arbol.primos(datoPrimos);
-                    if (primos.isEmpty()) {
-                        JOptionPane.showMessageDialog(null, "No se encontraron primos hermanos para el dato '" + datoPrimos + "'.", "Primos Hermanos", JOptionPane.INFORMATION_MESSAGE);
+
+                    if (primos == null || primos.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "No existe el dato o no tiene primos hermanos", "Primos hermanos", JOptionPane.INFORMATION_MESSAGE);
+                    } else if (primos.startsWith("Primos hermanos") || primos.startsWith("Primos hermanos de") || primos.startsWith("Primos hermanos de") || primos.startsWith("Primos hermanos de '")) {
+                        JOptionPane.showMessageDialog(null, primos, "Primos Hermanos", JOptionPane.INFORMATION_MESSAGE);
+                    } else if (primos.startsWith("El dato '") || primos.startsWith("El árbol está vacío") || primos.startsWith("Dato inválido") || primos.startsWith("Error interno")) {
+                        JOptionPane.showMessageDialog(null, primos, "Primos Hermanos", JOptionPane.INFORMATION_MESSAGE);
                     } else {
+                        // Mensaje por defecto con los primos
                         JOptionPane.showMessageDialog(null, "Primos Hermanos del dato '" + datoPrimos + "':\n" + primos, "Primos Hermanos", JOptionPane.INFORMATION_MESSAGE);
                     }
                     break;
